@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Godville Timer
-// @version      1.0
+// @version      1.1
 // @description  Helps determine where the minute mark changes in Godville and send your godvoice right before it.
 // @author       Koviko <koviko.net@gmail.com>
 // @website      http://koviko.net/
@@ -23,7 +23,9 @@
 		currentSecondSelector = "#current-second span",
 		//godInteractionSelector = ".m_infl",
 		timeStates = { before: "before", during: "during", exact: "exact", after: "" },
+		defaultValue = "--",
 		queueClassName = "active",
+		readyClassName = "is-ready",
 		storageKey = "godville-timer",
 		timeDelimiter = ":",
 		halfDay = 12 * 60 * 60 * 1000,
@@ -54,6 +56,7 @@
 			currentState = null,
 			isFirst = true,
 			isQueued = false,
+			isReady = false,
 			sortTime,
 			onlyUnique,
 			updateQueue,
@@ -111,7 +114,7 @@
 				exactSecond = null,
 				state = null;
 
-			if (allSeconds.length) {
+			if (allSeconds.length > 1) {
 				// Determine the earliest and latest seconds
 				earliestSecond = toSeconds(allSeconds[0].second);
 				latestSecond = toSeconds(allSeconds[allSeconds.length - 1].second);
@@ -122,6 +125,13 @@
 
 				// Determine if the current second is in between the latest and earliest seconds
 				if (toSeconds(difference) <= maxDisplayDifference) {
+					// Update the ready state
+					if (!isReady) {
+						isReady = true;
+						container.addClass(readyClassName);
+					}
+
+					// Update the second display
 					if (currentSecond === exactSecond) {
 						state = timeStates.exact;
 					} else if (difference >= 0 && (currentSecond < earliestSecond && currentSecond >= latestSecond)) {
@@ -135,11 +145,18 @@
 					} else {
 						state = timeStates.after;
 					}
+				} else if (isReady) {
+					isReady = false;
+					container.removeClass(readyClassName);
 				}
 
 				// Update the earliest & latest seconds
 				earliestSecondElement.text(pad(earliestSecond));
 				latestSecondElement.text(pad(latestSecond));
+			} else {
+				// Clear the earliest and latest seconds
+				earliestSecondElement.text(defaultValue);
+				latestSecondElement.text(defaultValue);
 			}
 
 			// Update the current second display
@@ -261,7 +278,8 @@
 			"#godville-timer > #current-second.before { color: #f7f7b7 }" +
 			"#godville-timer > #current-second.during { color: #a1d1a1 }" +
 			"#godville-timer > #current-second.exact { color: #3ada3a }" +
-			"#godville-timer .queue { position: absolute; left: 0; top: 8px; background: rgba(0,0,0,0.5); font-size: 75%; text-align: center; line-height: 250%; border-radius: 4px }" +
+			"#godville-timer .queue { display: none; position: absolute; left: 0; top: 8px; background: rgba(0,0,0,0.5); font-size: 75%; text-align: center; line-height: 250%; border-radius: 4px }" +
+			"#godville-timer.is-ready .queue { display: block }" +
 			"#godville-timer .queue .queued, #godville-timer .queue.active .not-queued { display: none }" +
 			"#godville-timer .queue.active .queued, #godville-timer .queue span { display: block }" +
 			"#godville-timer .queue button { pointer-events: all }" +
