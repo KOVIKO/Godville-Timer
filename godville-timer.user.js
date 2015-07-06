@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Godville Timer
-// @version      1.2
+// @version      1.3
 // @description  Helps determine where the minute mark changes in Godville and send your godvoice right before it.
 // @author       Koviko <koviko.net@gmail.com>
 // @website      http://koviko.net/
@@ -126,7 +126,7 @@
 				exactSecond = earliestSecond + exactOffset;
 
 				// Determine if the current second is in between the latest and earliest seconds
-				if (normalizedDifference <= maxDisplayDifference && normalizedDifference < 0) {
+				if (normalizedDifference <= maxDisplayDifference && normalizedDifference > 0) {
 					// Update the ready state
 					if (!isReady) {
 						isReady = true;
