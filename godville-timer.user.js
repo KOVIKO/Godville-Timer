@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Godville Timer
-// @version      1.3.1
+// @version      1.4
 // @description  Helps determine where the minute mark changes in Godville and send your godvoice right before it.
 // @author       Koviko <koviko.net@gmail.com>
 // @website      http://koviko.net/
@@ -21,6 +21,7 @@
 		latestSecondSelector = "#latest-second span",
 		currentSecondContainerSelector = "#current-second",
 		currentSecondSelector = "#current-second span",
+		inCombatSelector = "#hk_monster_name",
 		//godInteractionSelector = ".m_infl",
 		timeStates = { before: "before", during: "during", exact: "exact", after: "" },
 		defaultValue = "--",
@@ -32,7 +33,7 @@
 		maxTimeDifference = 59 * 1000,
 		secondsPerMinute = 60,
 		millisecondsPerMinute = secondsPerMinute * 1000,
-		maxLength = 100,
+		maxLength = 1000,
 		maxDisplayDifference = 10,
 		beforeThreshold = 3,
 		exactOffset = -1,
@@ -58,7 +59,8 @@
 			isQueued = false,
 			isReady = false,
 			sortTime,
-			onlyUnique,
+			everyOtherElement,
+			isInCombat,
 			updateQueue,
 			changeState,
 			updateDisplay,
@@ -70,8 +72,12 @@
 			return a.second - b.second;
 		};
 
-		onlyUnique = function (value, index, self) { // Filter non-unique values
-			return self.indexOf(value) === index;
+		everyOtherElement = function (value, index) { // Filter alternately
+			return index % 2;
+		};
+
+		isInCombat = function () { // Determine whether the hero is in combat
+			return $(inCombatSelector).is(":visible");
 		};
 
 		updateQueue = function (isQ) { // Update state of queue
@@ -89,7 +95,7 @@
 				currentState = newState;
 
 				// React to "exact" state
-				if (currentState === timeStates.exact && isQueued) {
+				if (currentState === timeStates.exact && isQueued && !isInCombat()) {
 					updateQueue(false);
 
 					// Make sure the button exists
@@ -98,7 +104,7 @@
 					}
 
 					// Click the button
-					if (!godvoiceButton.is(":disabled")) {
+					if (godvoiceButton.length && !godvoiceButton.is(":disabled")) {
 						godvoiceButton.click();
 					}
 				}
@@ -186,11 +192,12 @@
 				allSeconds.shift();
 			}
 
-			// Save to localStorage
+			// Cut the array's size in half if it gets too large
 			if (allSeconds.length > maxLength) {
-				allSeconds = allSeconds.filter(onlyUnique);
+				allSeconds = allSeconds.filter(everyOtherElement);
 			}
 
+			// Save to local storage
 			localStorage.setItem(storageKey, JSON.stringify(allSeconds));
 		};
 
