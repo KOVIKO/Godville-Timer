@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Godville Timer
-// @version      1.4
+// @version      1.4.1
 // @description  Helps determine where the minute mark changes in Godville and send your godvoice right before it.
 // @author       Koviko <koviko.net@gmail.com>
 // @website      http://koviko.net/
@@ -21,7 +21,7 @@
 		latestSecondSelector = "#latest-second span",
 		currentSecondContainerSelector = "#current-second",
 		currentSecondSelector = "#current-second span",
-		inCombatSelector = "#hk_monster_name",
+		inCombatSelector = "#news .l_capt",
 		//godInteractionSelector = ".m_infl",
 		timeStates = { before: "before", during: "during", exact: "exact", after: "" },
 		defaultValue = "--",
