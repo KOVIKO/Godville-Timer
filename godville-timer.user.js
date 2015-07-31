@@ -33,7 +33,7 @@
 		maxTimeDifference = 59 * 1000,
 		secondsPerMinute = 60,
 		millisecondsPerMinute = secondsPerMinute * 1000,
-		maxLength = 1000,
+		maxLength = secondsPerMinute,
 		maxDisplayDifference = 10,
 		beforeThreshold = 3,
 		exactOffset = -1,
@@ -59,7 +59,7 @@
 			isQueued = false,
 			isReady = false,
 			sortTime,
-			everyOtherElement,
+			onlyUnique,
 			isInCombat,
 			updateQueue,
 			changeState,
@@ -72,8 +72,8 @@
 			return a.second - b.second;
 		};
 
-		everyOtherElement = function (value, index) { // Filter alternately
-			return index % 2;
+		onlyUnique = function (value, index, self) { // Filter non-unique values
+			return self.indexOf(value) === index;
 		};
 
 		isInCombat = function () { // Determine whether the hero is in combat
@@ -192,9 +192,9 @@
 				allSeconds.shift();
 			}
 
-			// Cut the array's size in half if it gets too large
+			// Shrink the array when it gets too large
 			if (allSeconds.length > maxLength) {
-				allSeconds = allSeconds.filter(everyOtherElement);
+				allSeconds = allSeconds.filter(onlyUnique);
 			}
 
 			// Save to local storage
