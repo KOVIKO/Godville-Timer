@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Godville Timer
-// @version      1.4.1
+// @version      1.4.2
 // @description  Helps determine where the minute mark changes in Godville and send your godvoice right before it.
 // @author       Koviko <koviko.net@gmail.com>
 // @website      http://koviko.net/
@@ -185,7 +185,17 @@
 			// Sort all times
 			allSeconds.sort(sortTime);
 
-			// Validate earliest and latest seconds are within 60 seconds of each other
+			// Determine if the new time invalidates the earliest second
+			while ((allSeconds[0].second + secondsPerMinute) <= timeObject.second) {
+				allSeconds.shift();
+			}
+
+			// Determine if the new time invalidates the latest second
+			while ((allSeconds[allSeconds.length - 1].second - secondsPerMinute) >= timeObject.second) {
+				allSeconds.pop();
+			}
+
+			// Validate earliest and latest seconds are within 60 seconds of each other, just in case the data is corrupted
 			while ((allSeconds[allSeconds.length - 1].second - allSeconds[0].second) >= secondsPerMinute) {
 				// Remove first and last element
 				allSeconds.pop();
